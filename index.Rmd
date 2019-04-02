@@ -1,0 +1,38 @@
+---
+title: "R Markdown Presentation & Plotly"
+author: "Evgeny Gorelov"
+date: "4/2/2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(plotly)
+```
+
+## Interactive plot from Reproducable Data course
+The panel plot, containing a time series of the 5-minute interval and the average number of steps taken, averaged across all weekday days or weekend days:
+```{r interactiveplot, echo=FALSE, fig.height=3}
+act<-read.csv(unz("activity.zip", "activity.csv"))
+StepsProInt<-aggregate(act$steps, by=list(interval=act$interval), FUN=mean, na.rm=T) 
+act2<-act
+listBadRows<-which(!complete.cases(act))
+invisible(lapply(listBadRows, function (y) act2[y,]$steps<<-StepsProInt[StepsProInt$interval==act2[y,]$interval,]$x))
+
+CheckWeekDay<-function (x) {
+  if (weekdays(as.Date(x)) %in% c("Saturday","Sunday"))
+    return("weekend")
+  else
+    return("weekday")
+}
+act2$wday<-as.factor(unlist(lapply(act2$date, CheckWeekDay)))
+#plot_ly(x=act2$interval, y=act2$steps, color=act2$wday)
+options(warn = -1) 
+plot_ly(act2, x=~interval, y=~steps, color=~as.factor(wday), type = 'scatter', mode="markers")
+```
+
+## Conclusions
+
+The interactive plot constructed using *plotly* has been shown,
+thanks for the attention :)
